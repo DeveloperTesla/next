@@ -1,8 +1,9 @@
 # Next
 
-![Badge](https://img.shields.io/badge/License-MIT-blue)
-![Badge](https://img.shields.io/badge/Version-1.0.0-orange)
-![Badge](https://img.shields.io/badge/Release-stable-brightgreen)
+![License](https://img.shields.io/badge/License-MIT-blue)
+![Version](https://img.shields.io/badge/Version-1.0.0-orange)
+![Release](https://img.shields.io/badge/Release-stable-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-passed-brightgreen)
 
 A boilerplate template for building modern websites with **Next.js**, designed for fast development and easy customization.
 
@@ -36,8 +37,6 @@ Available commands:
 - **`yarn test:watch`**: Runs tests in watch mode for faster development.
 - **`yarn test:verbose`**: Runs tests with detailed output for each test case.
 - **`yarn test:coverage`**: Generates a code coverage report.
-- **`yarn prepare`**: Sets up Git hooks via Husky (automatically called by package managers).
-- **`yarn postinstall`**: Ensures Husky is initialized after dependencies are installed.
 
 ## Contributing
 
