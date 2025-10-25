@@ -1,8 +1,8 @@
 # Next
 
 ![License](https://img.shields.io/badge/License-MIT-blue)
-![Version](https://img.shields.io/badge/Version-1.0.0-orange)
-![Release](https://img.shields.io/badge/Release-stable-red)
+![Version](https://img.shields.io/badge/Version-1.0.0-brightgreen)
+![Release](https://img.shields.io/badge/Release-stable-blue)
 ![Tests](https://img.shields.io/badge/Tests-passed-brightgreen)
 
 A boilerplate template for building modern websites with **Next.js**, designed for fast development and easy customization.
