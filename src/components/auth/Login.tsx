@@ -1,10 +1,11 @@
-// src/components/auth/Login.tsx
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
-import { AlertCircleIcon } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, type LoginData } from "@/validations/loginSchema";
+import { useLoginStore } from "@/store/useLoginStore";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,64 +16,34 @@ import {
     FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertTitle } from "@/components/ui/alert";
+import { AlertCircleIcon } from "lucide-react";
+import Link from "next/link";
 
 export function LoginForm({
     className,
     ...props
 }: React.ComponentProps<"div">) {
     const router = useRouter();
+    const { login, loading, error, clearError } = useLoginStore();
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
+    const form = useForm<LoginData>({
+        resolver: zodResolver(loginSchema),
+        defaultValues: { email: "", password: "" },
+    });
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
-
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
-
-        if (signInError) {
-            setError("Incorrect email or password.");
-            setLoading(false);
-            return;
+    const onSubmit = async (data: LoginData) => {
+        clearError();
+        await login(data.email, data.password);
+        if (!error) {
+            router.push(`/otp?email=${encodeURIComponent(data.email)}`);
         }
-        const { error: updateError } = await supabase.auth.updateUser({
-            data: { otp_verified: false },
-        });
-
-        if (updateError) {
-            setError("Failed to initialize OTP verification.");
-            setLoading(false);
-            return;
-        }
-
-        const { error: otpError } = await supabase.auth.signInWithOtp({
-            email,
-            options: { shouldCreateUser: false },
-        });
-
-        if (otpError) {
-            setError("Failed to send verification code.");
-            setLoading(false);
-            return;
-        }
-
-        router.push(`/otp?email=${encodeURIComponent(email)}`);
-        setLoading(false);
     };
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
                 <FieldGroup>
                     <div className="flex flex-col items-center gap-2 text-center">
                         <h1 className="text-xl font-bold">
@@ -89,17 +60,23 @@ export function LoginForm({
                         </FieldDescription>
                     </div>
 
+                    {/* Email */}
                     <Field>
                         <FieldLabel htmlFor="email">Email</FieldLabel>
                         <Input
                             id="email"
                             type="email"
                             placeholder="user@example.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
+                            {...form.register("email")}
                         />
+                        {form.formState.errors.email && (
+                            <FieldDescription className="text-red-500">
+                                {form.formState.errors.email.message}
+                            </FieldDescription>
+                        )}
                     </Field>
+
+                    {/* Password */}
                     <Field>
                         <div className="flex items-center">
                             <FieldLabel htmlFor="password">Password</FieldLabel>
@@ -114,11 +91,16 @@ export function LoginForm({
                             id="password"
                             type="password"
                             placeholder="••••••••"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
+                            {...form.register("password")}
                         />
+                        {form.formState.errors.password && (
+                            <FieldDescription className="text-red-500">
+                                {form.formState.errors.password.message}
+                            </FieldDescription>
+                        )}
                     </Field>
+
+                    {/* Submit */}
                     <Field>
                         <Button
                             type="submit"
@@ -135,6 +117,7 @@ export function LoginForm({
                             )}
                         </Button>
                     </Field>
+
                     <FieldSeparator>Or</FieldSeparator>
                     <Field className="grid gap-4 grid-cols-6">
                         <Button
@@ -239,13 +222,12 @@ export function LoginForm({
                 <Link href="/privacy">Privacy Policy</Link>.
             </FieldDescription>
 
+            {/* Error */}
             {error && (
                 <div className="fixed bottom-[30px] left-1/2 -translate-x-1/2 z-50">
                     <Alert variant="destructive">
                         <AlertCircleIcon />
-                        <AlertTitle>
-                            Please check your account details and try again.
-                        </AlertTitle>
+                        <AlertTitle>{error}</AlertTitle>
                     </Alert>
                 </div>
             )}

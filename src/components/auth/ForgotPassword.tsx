@@ -1,8 +1,13 @@
-// src/components/auth/ForgotPassword.tsx
 "use client";
 
-import { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+    forgotPasswordSchema,
+    type ForgotPasswordData,
+} from "@/validations/forgotPasswordSchema";
+import { useForgotPasswordStore } from "@/store/useForgotPasswordStore";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,34 +26,22 @@ export function ForgotPasswordForm({
     className,
     ...props
 }: React.ComponentProps<"div">) {
-    const [email, setEmail] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState(false);
+    const { sendResetLink, loading, error, success, clearStatus } =
+        useForgotPasswordStore();
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
-        setSuccess(false);
+    const form = useForm<ForgotPasswordData>({
+        resolver: zodResolver(forgotPasswordSchema),
+        defaultValues: { email: "" },
+    });
 
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo:
-                "https://jrdevhub.github.io/next-supabase/reset-password",
-        });
-
-        if (error) {
-            setError(error.message);
-        } else {
-            setSuccess(true);
-        }
-
-        setLoading(false);
+    const onSubmit = async (data: ForgotPasswordData) => {
+        clearStatus();
+        await sendResetLink(data.email);
     };
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
                 <FieldGroup>
                     <div className="flex flex-col items-center gap-2 text-center">
                         <h1 className="text-xl font-bold">
@@ -65,10 +58,14 @@ export function ForgotPasswordForm({
                             id="email"
                             type="email"
                             placeholder="user@example.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            {...form.register("email")}
                             required
                         />
+                        {form.formState.errors.email && (
+                            <FieldDescription className="text-red-500">
+                                {form.formState.errors.email.message}
+                            </FieldDescription>
+                        )}
                     </Field>
 
                     <Field>

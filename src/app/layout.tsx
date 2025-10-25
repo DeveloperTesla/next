@@ -7,7 +7,7 @@ import SelfXSSWarning from "@/components/utils/SelfXSSWarning";
 import { Navbar } from "@/components/content/Navbar";
 
 export const metadata: Metadata = {
-    title: "Next & Supabase",
+    title: "Next",
     description:
         "A boilerplate template for building modern websites with Next.js and Supabase, designed for fast development and easy customization.",
 };

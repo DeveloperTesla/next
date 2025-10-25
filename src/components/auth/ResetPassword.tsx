@@ -1,62 +1,62 @@
-// src/components/auth/ResetPassword.tsx
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
-import { AlertCircleIcon, CheckCircle2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+    resetPasswordSchema,
+    type ResetPasswordData,
+} from "@/validations/resetPasswordSchema";
+import { useResetPasswordStore } from "@/store/useResetPasswordStore";
+
 import { Button } from "@/components/ui/button";
 import {
     Field,
-    FieldDescription,
     FieldGroup,
     FieldLabel,
+    FieldDescription,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertTitle } from "@/components/ui/alert";
+import { AlertCircleIcon, CheckCircle2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useEffect } from "react";
 
 export function ResetPasswordForm({
     className,
     ...props
 }: React.ComponentProps<"div">) {
     const router = useRouter();
+    const { resetPassword, loading, error, success, clearStatus } =
+        useResetPasswordStore();
 
-    const [password, setPassword] = useState("");
-    const [confirm, setConfirm] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState(false);
+    const form = useForm<ResetPasswordData>({
+        resolver: zodResolver(resetPasswordSchema),
+        defaultValues: {
+            password: "",
+            confirm: "",
+        },
+    });
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError(null);
-
-        if (password !== confirm) {
-            setError("Passwords do not match.");
-            return;
-        }
-
-        setLoading(true);
-
-        const { error } = await supabase.auth.updateUser({
-            password,
-        });
-
-        if (error) {
-            setError(error.message);
-        } else {
-            setSuccess(true);
-            setTimeout(() => router.push("/"), 2000);
-        }
-
-        setLoading(false);
+    const onSubmit = async (data: ResetPasswordData) => {
+        await resetPassword(data.password);
     };
+
+    // po úspěšném resetu přesměruj po 2 sekundách
+    useEffect(() => {
+        if (success) {
+            const timer = setTimeout(() => {
+                clearStatus();
+                router.push("/");
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [success, router, clearStatus]);
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
                 <FieldGroup>
                     <div className="flex flex-col items-center gap-2 text-center">
                         <h1 className="text-xl font-bold">
@@ -68,15 +68,17 @@ export function ResetPasswordForm({
                     </div>
 
                     <Field>
-                        <FieldLabel htmlFor="password">New Password</FieldLabel>
+                        <FieldLabel>New Password</FieldLabel>
                         <Input
-                            id="password"
                             type="password"
                             placeholder="••••••••"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
+                            {...form.register("password")}
                         />
+                        {form.formState.errors.password && (
+                            <FieldDescription className="text-red-500">
+                                {form.formState.errors.password.message}
+                            </FieldDescription>
+                        )}
                         <FieldDescription>
                             Must include at least 12 characters,
                             upper/lowercase, number, and special characters.
@@ -84,17 +86,17 @@ export function ResetPasswordForm({
                     </Field>
 
                     <Field>
-                        <FieldLabel htmlFor="confirm">
-                            Confirm Password
-                        </FieldLabel>
+                        <FieldLabel>Confirm Password</FieldLabel>
                         <Input
-                            id="confirm"
                             type="password"
                             placeholder="••••••••"
-                            value={confirm}
-                            onChange={(e) => setConfirm(e.target.value)}
-                            required
+                            {...form.register("confirm")}
                         />
+                        {form.formState.errors.confirm && (
+                            <FieldDescription className="text-red-500">
+                                {form.formState.errors.confirm.message}
+                            </FieldDescription>
+                        )}
                     </Field>
 
                     <Field>

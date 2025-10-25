@@ -1,10 +1,10 @@
-# Next & Supabase
+# Next
 
 ![Badge](https://img.shields.io/badge/License-MIT-blue)
 ![Badge](https://img.shields.io/badge/Version-1.0.0-orange)
 ![Badge](https://img.shields.io/badge/Release-stable-brightgreen)
 
-A boilerplate template for building modern websites with **Next.js** and **Supabase**, designed for fast development and easy customization.
+A boilerplate template for building modern websites with **Next.js**, designed for fast development and easy customization.
 
 [Check out the demo](https://jrdevhub.github.io/next-supabase)
 
@@ -25,13 +25,19 @@ First, install dependencies using your preferred package manager:
 
 Available commands:
 
+- **`yarn dev`**: Starts the app in development mode using Turbopack with hot-reloading.
+- **`yarn build`**: Builds the app for production using Turbopack.
 - **`yarn start`**: Starts the app in production mode after building.
-- **`yarn format`**: Formats all code files.
 - **`yarn lint`**: Lints the codebase for quality and consistency.
-- **`yarn dev`**: Starts the app in development mode with hot-reloading.
-- **`yarn build`**: Builds the app for production deployment.
-- **`yarn clean`**: Cleans the .next folder.
+- **`yarn format`**: Formats all code files using Prettier.
+- **`yarn clean`**: Cleans the `.next` build folder.
 - **`yarn analyze`**: Builds the project and visualizes the bundle size.
+- **`yarn test`**: Runs all tests using Jest.
+- **`yarn test:watch`**: Runs tests in watch mode for faster development.
+- **`yarn test:verbose`**: Runs tests with detailed output for each test case.
+- **`yarn test:coverage`**: Generates a code coverage report.
+- **`yarn prepare`**: Sets up Git hooks via Husky (automatically called by package managers).
+- **`yarn postinstall`**: Ensures Husky is initialized after dependencies are installed.
 
 ## Contributing
 
